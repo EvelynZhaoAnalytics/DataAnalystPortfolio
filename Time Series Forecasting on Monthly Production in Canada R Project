@@ -1,12 +1,52 @@
 # load libraries
 library(fpp3)
+## ── Attaching packages ────────────────────────────────────────────── fpp3 0.5 ──
+## ✔ tibble      3.2.1     ✔ tsibble     1.1.3
+## ✔ dplyr       1.1.2     ✔ tsibbledata 0.4.1
+## ✔ tidyr       1.3.0     ✔ feasts      0.3.1
+## ✔ lubridate   1.9.2     ✔ fable       0.3.3
+## ✔ ggplot2     3.4.2     ✔ fabletools  0.3.3
+## ── Conflicts ───────────────────────────────────────────────── fpp3_conflicts ──
+## ✖ lubridate::date()    masks base::date()
+## ✖ dplyr::filter()      masks stats::filter()
+## ✖ tsibble::intersect() masks base::intersect()
+## ✖ tsibble::interval()  masks lubridate::interval()
+## ✖ dplyr::lag()         masks stats::lag()
+## ✖ tsibble::setdiff()   masks base::setdiff()
+## ✖ tsibble::union()     masks base::union()
 library(tidyverse)
+## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ forcats 1.0.0     ✔ readr   2.1.4
+## ✔ purrr   1.0.1     ✔ stringr 1.5.0
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter()     masks stats::filter()
+## ✖ tsibble::interval() masks lubridate::interval()
+## ✖ dplyr::lag()        masks stats::lag()
+## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 library(tsibble)
 library(knitr)
 library(caret)
+## Loading required package: lattice
+## 
+## Attaching package: 'caret'
+## 
+## The following object is masked from 'package:purrr':
+## 
+##     lift
+## 
+## The following objects are masked from 'package:fabletools':
+## 
+##     MAE, RMSE
 library(MASS)
+## 
+## Attaching package: 'MASS'
+## 
+## The following object is masked from 'package:dplyr':
+## 
+##     select
 library(dplyr)
 library(fable.prophet)
+## Loading required package: Rcpp
 library(readxl)
 
 # load dataset
@@ -23,28 +63,28 @@ all_production %>% autoplot(Production) +
   labs(y = "Billions Canadian Dollar",  x="Month",
        title = "Production: Total industry excluding construction (Canada)",
        subtitle = "1961-2022")
-
+ 
 # Time plot from 1983 to 2003
 all_production %>% filter(year(Date) <= 2003 & year(Date) >= 1983) %>% 
   autoplot(Production, col = 'purple') +
   labs(y = "Billions Canadian Dollar",  x="Month",
        title = "Production: Total industry excluding construction (Canada)",
        subtitle = "1983-2003")
-
+ 
 # Time plot from 2003 to 2022
 all_production |> filter(year(Date) >= 2003) |>  
   autoplot(Production, col = 'blue') +
   labs(y = "Billions Canadian Dollar",  x="Month",
        title = "Production: Total industry excluding construction (Canada)",
        subtitle = "2003-2022")
-
+ 
 # Time plot from 1983 to 2022
 all_production %>% filter(year(Date) >= 1983) %>%
   autoplot(Production, col = 'darkblue') +
   labs(y = "Billions Canadian Dollar",  x="Month",
        title = "Production: Total industry excluding construction (Canada)",
        subtitle = "1983-2022")
-
+ 
 # Seasonal plot from 1983 to 2008
 all_production |>
   filter(year(Date) <= 2008 & year(Date) >= 1983) |>
@@ -52,7 +92,7 @@ all_production |>
   labs(y = "Billions Canadian Dollar", x="Month",
        title = "Seasonal plot - Production: Total industry excluding construction (Canada)",
        subtitle = "1983-2008")
-
+ 
 # Seasonal plot from 2008 to 2022
 all_production |>
   filter(year(Date) >= 2008) |>
@@ -60,7 +100,7 @@ all_production |>
   labs(y = "Billions Canadian Dollar", x="Month",
        title = "Seasonal plot - Production: Total industry excluding construction (Canada)",
        subtitle = "2008-2022")
-
+ 
 # Seasonal subseries from 1983 to 2003
 all_production |> 
   filter(year(Date) <= 2003 & year(Date) >= 1983) |> 
@@ -69,7 +109,7 @@ all_production |>
     y = "Billions Canadian Dollar",
     title = "Seasonal subseries - Production: Total industry excluding construction (Canada)",
     subtitle = "1983-2003")
-
+ 
 # Seasonal subseries from 2003 to 2022
 all_production |>
   filter(year(Date) >= 2003) |>
@@ -78,14 +118,14 @@ all_production |>
     y = "Billions Canadian Dollar",
     title = "Seasonal subseries - Production: Total industry excluding construction (Canada)",
     subtitle = "2003-2022")
-
+ 
 # ACF plot from 1983 to 2003
 all_production %>% 
   filter(year(Date) <= 2003 & year(Date) >= 1983) %>%  
   ACF(Production, lag_max = 120) %>% autoplot() +
   labs(title = "Autocorrelation function of monthly Production: Total industry excluding construction (Canada)",
        subtitle = "1983-2003")
-
+ 
 # ACF plot from 2003 to 2022
 all_production %>%
   filter(year(Date) >= 2003) |>
@@ -93,14 +133,14 @@ all_production %>%
   autoplot() +
   labs(title = "Autocorrelation function of monthly Production: Total industry excluding construction (Canada)",
        subtitle = "2003-2022")
-
-
+ 
 # 3. data transformation
 # Do we need Data transformation? Let's check how the observations' variance change over time
 production = all_production %>%
   filter(year(Date) >= 1983)
 
 production %>% autoplot(Production, col = 'steelblue') + ylim(0, 40)
+ 
 # From the timeplot, ignoring the dip in 2009 and 2020 (outlier years), we can see that the variance doesn't change much over time.
 # So there is no need for a transformation here.
 
@@ -109,17 +149,20 @@ lmodel1 <- lm(Production ~ Date, data = production)
 
 # Histogram of the residuals
 hist(lmodel1$residuals)
+ 
 # QQplot for the residuals
 qqnorm(lmodel1$residuals)
 qqline(lmodel1$residuals, col = "steelblue", lwd = 2)
+ 
 # Fitted vs residual plot
 plot(lmodel1)
-
+    
 # From the above plots, the histogram of the residuals seem to be normally distributed. It is slightly left skewed, but not much
 # Coming to the QQ plot, the residuals almost form a straight line, only a few data points deviate from the line
 # With the above data, we can confirm that it is not necessary for a transformation.
 
 bc <- boxcox(lmodel1, plotit = TRUE)
+ 
 lambda <- bc$x[which.max(bc$y)]
 # lambda = 1.11 which means no transformation is needed.
 
@@ -134,7 +177,8 @@ production |>
   autoplot() +
   labs(title = "Classical additive decomposition of total
                   industry excluding construction")
-
+## Warning: Removed 6 rows containing missing values (`geom_line()`).
+ 
 # x-11
 x11_dcmp <- production |>
   model(x11 = X_13ARIMA_SEATS(Production ~ x11())) |>
@@ -142,44 +186,147 @@ x11_dcmp <- production |>
 autoplot(x11_dcmp) +
   labs(title =
          "Decomposition of total industry excluding construction using X-11")
-
+ 
 # STL
 dcmp <- production %>% model(stl = STL(Production ~ trend(window = 3) + season(window = 'periodic'), robust = TRUE))
 dcmp %>% components(dcmp) %>% autoplot() 
-
-
+ 
 # 4. models
 # ETS
 # model development
 
 fit_ets1 <- production %>% model(ETS(Production ~ error("M") + trend("A") + season("A")))
 report(fit_ets1)
+## Series: Production 
+## Model: ETS(M,A,A) 
+##   Smoothing parameters:
+##     alpha = 0.6696642 
+##     beta  = 0.0001013185 
+##     gamma = 0.3286568 
+## 
+##   Initial states:
+##      l[0]       b[0]       s[0]     s[-1]     s[-2]     s[-3]      s[-4]
+##  15.75607 0.05588438 -0.4465416 0.6975772 0.4381914 0.3052911 -0.6132915
+##      s[-5]     s[-6]      s[-7]      s[-8]     s[-9]   s[-10]     s[-11]
+##  -2.285853 0.2474023 -0.3317066 0.04033791 0.6653382 1.434321 -0.1510663
+## 
+##   sigma^2:  3e-04
+## 
+##      AIC     AICc      BIC 
+## 2255.341 2256.666 2326.295
 # AIC      AICc     BIC 
 # 2255.341 2256.666 2326.295
 
 fit_ets2 <- production %>% model(ETS(Production ~ error("A") + trend("A") + season("A")))
 report(fit_ets2)
+## Series: Production 
+## Model: ETS(A,A,A) 
+##   Smoothing parameters:
+##     alpha = 0.6847903 
+##     beta  = 0.0001045559 
+##     gamma = 0.3152048 
+## 
+##   Initial states:
+##      l[0]       b[0]      s[0]     s[-1]     s[-2]     s[-3]     s[-4]    s[-5]
+##  15.87585 0.03259521 -0.763358 0.5213164 0.5058286 0.1690047 -1.080283 -1.87863
+##      s[-6]      s[-7]      s[-8]    s[-9]   s[-10]      s[-11]
+##  0.2324006 -0.4089353 0.01491426 1.282422 1.481259 -0.07593915
+## 
+##   sigma^2:  0.2418
+## 
+##      AIC     AICc      BIC 
+## 2299.667 2300.991 2370.621
 # AIC      AICc     BIC 
 # 2299.667 2300.991 2370.621
 
 fit_ets3 <- production %>% model(ETS(Production ~ error("M") + trend("A") + season("M")))
 report(fit_ets3)
+## Series: Production 
+## Model: ETS(M,A,M) 
+##   Smoothing parameters:
+##     alpha = 0.5995057 
+##     beta  = 0.01449151 
+##     gamma = 0.3152204 
+## 
+##   Initial states:
+##      l[0]      b[0]      s[0]    s[-1]    s[-2]    s[-3]     s[-4]     s[-5]
+##  14.96606 0.0244874 0.9657772 1.032187 1.009967 1.003578 0.9543986 0.9010202
+##     s[-6]    s[-7]    s[-8]    s[-9]   s[-10]    s[-11]
+##  1.029674 1.001739 1.001242 1.051415 1.060053 0.9889501
+## 
+##   sigma^2:  3e-04
+## 
+##      AIC     AICc      BIC 
+## 2270.324 2271.649 2341.279
 # AIC      AICc     BIC 
 # 2270.324 2271.649 2341.279
 
 fit_ets4 <- production %>% model(ETS(Production ~ error("A") + trend("A") + season("M")))
 report(fit_ets4)
+## Series: Production 
+## Model: ETS(A,A,M) 
+##   Smoothing parameters:
+##     alpha = 0.6957052 
+##     beta  = 0.0603935 
+##     gamma = 0.3042833 
+## 
+##   Initial states:
+##      l[0]      b[0]      s[0]   s[-1]     s[-2]    s[-3]     s[-4]     s[-5]
+##  15.82959 0.1848308 0.9707738 1.01778 0.9985835 1.006254 0.9257813 0.8770355
+##     s[-6]     s[-7]    s[-8]    s[-9]   s[-10]   s[-11]
+##  1.017421 0.9908205 1.016566 1.085202 1.084184 1.009598
+## 
+##   sigma^2:  0.2549
+## 
+##      AIC     AICc      BIC 
+## 2325.111 2326.435 2396.065
 # AIC      AICc     BIC 
 # 2325.111 2326.435 2396.065
 
 #ETS (M, Ad, M)
 fit_ets5 <- production %>% model(ETS(Production ~ error("M") + trend("Ad") + season("M")))
 report(fit_ets5)
+## Series: Production 
+## Model: ETS(M,Ad,M) 
+##   Smoothing parameters:
+##     alpha = 0.6762856 
+##     beta  = 0.0003125713 
+##     gamma = 0.3237003 
+##     phi   = 0.9656592 
+## 
+##   Initial states:
+##      l[0]    b[0]      s[0]    s[-1]    s[-2]    s[-3]     s[-4]     s[-5]
+##  15.02702 0.25747 0.9605833 1.022545 1.005548 1.011106 0.9428236 0.8882599
+##     s[-6]     s[-7]    s[-8]    s[-9]   s[-10]   s[-11]
+##  1.028409 0.9915969 1.012758 1.066372 1.067969 1.002029
+## 
+##   sigma^2:  3e-04
+## 
+##      AIC     AICc      BIC 
+## 2229.041 2230.525 2304.169
 # AIC      AICc     BIC 
 # 2229.041 2230.525 2304.169
 
 fit_ets6 <- production %>% model(ETS(Production ~ error("M") + trend("Ad") + season("A")))
 report(fit_ets6)
+## Series: Production 
+## Model: ETS(M,Ad,A) 
+##   Smoothing parameters:
+##     alpha = 0.6638954 
+##     beta  = 0.0001184304 
+##     gamma = 0.3360297 
+##     phi   = 0.952822 
+## 
+##   Initial states:
+##      l[0]      b[0]       s[0]     s[-1]     s[-2]     s[-3]      s[-4]
+##  15.44176 0.2347784 -0.7930652 0.5774264 0.3568898 0.4195231 -0.9724458
+##      s[-5]      s[-6]      s[-7]       s[-8]    s[-9]   s[-10]    s[-11]
+##  -1.897869 0.06039722 -0.3867147 -0.03166909 1.102266 1.443206 0.1220546
+## 
+##   sigma^2:  3e-04
+## 
+##      AIC     AICc      BIC 
+## 2244.905 2246.389 2320.033
 # AIC      AICc     BIC
 # 2244.905 2246.389 2320.033 
 # The best ETS model is fit_est5.
@@ -189,37 +336,65 @@ forecast(fit_ets5, h=12) %>%
   autoplot(production) +
   labs(title = "Forecasts of Production: Total industry excluding construction
        using the ETS (M,Ad,M) model")
-
+ 
 # ARIMA
 # differencing plot
 production %>% gg_tsdisplay(difference(Production, 12), plot_type='partial', lag=20) ###### ANITHA
+## Warning: Removed 12 rows containing missing values (`geom_line()`).
+## Warning: Removed 12 rows containing missing values (`geom_point()`).
+ 
 #Double differencing
 production %>% gg_tsdisplay(difference(difference(Production, 12)), plot_type='partial', lag=120)
+## Warning: Removed 13 rows containing missing values (`geom_line()`).
+## Warning: Removed 13 rows containing missing values (`geom_point()`).
+ 
 #the PACF is suggestive of an AR (2) model, the ACF suggests an MA(2) model.
 
 # non seasonal differencing
 production <- production %>% mutate(diff_prod = difference(Production))
 production %>% autoplot(diff_prod)
+## Warning: Removed 1 row containing missing values (`geom_line()`).
+ 
 production %>% ACF(diff_prod, lag_max = 120) %>% autoplot()
+ 
 production %>% PACF(diff_prod, lag_max = 120) %>% autoplot()
-
+ 
 # seasonal differencing
 production <- production %>% mutate(sdiff_prod = difference(Production, 12))
 production %>% autoplot(sdiff_prod)
+## Warning: Removed 12 rows containing missing values (`geom_line()`).
+ 
 production %>% ACF(sdiff_prod, lag_max = 120) %>% autoplot()
+ 
 production %>% PACF(sdiff_prod, lag_max = 120) %>% autoplot()
-
+ 
 # stationary test
 production %>% features(Production, unitroot_kpss)
+## # A tibble: 1 × 2
+##   kpss_stat kpss_pvalue
+##       <dbl>       <dbl>
+## 1      7.03        0.01
 #p-value 0.01, the data are not stationary
 
 production %>% features(diff_prod, unitroot_kpss)
+## # A tibble: 1 × 2
+##   kpss_stat kpss_pvalue
+##       <dbl>       <dbl>
+## 1    0.0497         0.1
 #p-value 0.1, the differenced data appear stationary
 
 production %>% features(sdiff_prod, unitroot_kpss)
+## # A tibble: 1 × 2
+##   kpss_stat kpss_pvalue
+##       <dbl>       <dbl>
+## 1     0.247         0.1
 #p-value 0.1, the differenced data appear stationary
 
 production |> features(Production, unitroot_ndiffs)
+## # A tibble: 1 × 1
+##   ndiffs
+##    <int>
+## 1      1
 #ndiffs
 #<int>
 #  1      1
@@ -227,40 +402,104 @@ production |> features(Production, unitroot_ndiffs)
 
 # Display the ACF/PACF of seasonally differenced data
 production %>% gg_tsdisplay(sdiff_prod, plot_type='partial', lag = 120)
-
+## Warning: Removed 12 rows containing missing values (`geom_line()`).
+## Warning: Removed 12 rows containing missing values (`geom_point()`).
+ 
 # Display the ACF/PACF of double differenced data
 production %>% gg_tsdisplay(sdiff_prod %>% difference(), plot_type='partial', lag = 120)
-
+## Warning: Removed 13 rows containing missing values (`geom_line()`).
+## Warning: Removed 13 rows containing missing values (`geom_point()`).
+ 
 # model development
 fit_sarima1 <- production %>% model(ARIMA(Production ~ pdq(2, 1, 2) + PDQ(0, 1, 1)))
 report(fit_sarima1)
+## Series: Production 
+## Model: ARIMA(2,1,2)(0,1,1)[12] 
+## 
+## Coefficients:
+##           ar1      ar2     ma1      ma2     sma1
+##       -0.4659  -0.0139  0.4294  -0.1119  -0.6370
+## s.e.   0.3999   0.3407  0.3984   0.3427   0.0339
+## 
+## sigma^2 estimated as 0.2157:  log likelihood=-305.13
+## AIC=622.26   AICc=622.45   BIC=647.14
 # AIC=622.26   AICc=622.45   BIC=647.14
 
 fit_sarima2 <- production %>% model(ARIMA(Production ~ pdq(1, 1, 1) + PDQ(0, 1, 1)))
 report(fit_sarima2)
+## Series: Production 
+## Model: ARIMA(1,1,1)(0,1,1)[12] 
+## 
+## Coefficients:
+##          ar1      ma1     sma1
+##       0.4537  -0.5189  -0.6378
+## s.e.  0.2973   0.2836   0.0340
+## 
+## sigma^2 estimated as 0.2172:  log likelihood=-307.68
+## AIC=623.36   AICc=623.44   BIC=639.94
 # AIC=623.36   AICc=623.44   BIC=639.940
 
 fit_sarima3 <- production %>% model(ARIMA(Production ~ pdq(2, 1, 2) + PDQ(1, 1, 1)))
 report(fit_sarima3)
+## Series: Production 
+## Model: ARIMA(2,1,2)(1,1,1)[12] 
+## 
+## Coefficients:
+##           ar1      ar2     ma1      ma2     sar1     sma1
+##       -0.4886  -0.0320  0.4516  -0.0943  -0.0186  -0.6275
+## s.e.   0.4311   0.3663  0.4305   0.3703   0.0685   0.0495
+## 
+## sigma^2 estimated as 0.2161:  log likelihood=-305.1
+## AIC=624.19   AICc=624.44   BIC=653.22
 # AIC=624.19   AICc=624.44   BIC=653.22
 
 fit_sarima4 <- production %>% model(ARIMA(Production ~ pdq(1, 1, 1) + PDQ(1, 1, 1)))
 report(fit_sarima4)
+## Series: Production 
+## Model: ARIMA(1,1,1)(1,1,1)[12] 
+## 
+## Coefficients:
+##          ar1      ma1     sar1     sma1
+##       0.4495  -0.5150  -0.0075  -0.6338
+## s.e.  0.2965   0.2831   0.0676   0.0489
+## 
+## sigma^2 estimated as 0.2176:  log likelihood=-307.67
+## AIC=625.34   AICc=625.47   BIC=646.07
 # AIC=625.34   AICc=625.47   BIC=646.07
 
 fit_sarima5 <- production %>% model(ARIMA(Production ~ pdq(1, 1, 2) + PDQ(1, 1, 1)))
 report(fit_sarima5)
+## Series: Production 
+## Model: ARIMA(1,1,2)(1,1,1)[12] 
+## 
+## Coefficients:
+##           ar1    ma1      ma2     sar1     sma1
+##       -0.4558  0.419  -0.1263  -0.0177  -0.6280
+## s.e.   0.2582  0.257   0.0469   0.0678   0.0491
+## 
+## sigma^2 estimated as 0.2157:  log likelihood=-305.1
+## AIC=622.2   AICc=622.38   BIC=647.07
 # AIC=622.2   AICc=622.38   BIC=647.07
 
 fit_sarima6 <- production %>% model(ARIMA(Production ~ pdq(0, 1, 2) + PDQ(0, 1, 1)))
 report(fit_sarima6)
+## Series: Production 
+## Model: ARIMA(0,1,2)(0,1,1)[12] 
+## 
+## Coefficients:
+##           ma1      ma2     sma1
+##       -0.0329  -0.1072  -0.6363
+## s.e.   0.0471   0.0474   0.0342
+## 
+## sigma^2 estimated as 0.2156:  log likelihood=-305.96
+## AIC=619.93   AICc=620.01   BIC=636.51
 # AIC=619.93   AICc=620.01   BIC=636.51
 # The best ARIMA model so far is fit6.
 
 # Forecast plot of the best SARIMA model
 forecast(fit_sarima6, h=12) %>%
   autoplot(production)
-
+ 
 # STL_+ ETS
 STLF <- decomposition_model(
   STL(Production ~ season(window = Inf)),
@@ -287,7 +526,58 @@ cv %>% model(
     combination = (ets + stlf + arima + proph) / 4) %>% 
   forecast(h = 1) %>% 
   accuracy(production)
-
+## Warning: 1 error encountered for dcmp
+## [1] series is not periodic or has less than two periods
+## n.changepoints greater than number of observations. Using 0
+## n.changepoints greater than number of observations. Using 1
+## n.changepoints greater than number of observations. Using 2
+## n.changepoints greater than number of observations. Using 3
+## n.changepoints greater than number of observations. Using 3
+## n.changepoints greater than number of observations. Using 4
+## n.changepoints greater than number of observations. Using 5
+## n.changepoints greater than number of observations. Using 6
+## n.changepoints greater than number of observations. Using 7
+## n.changepoints greater than number of observations. Using 7
+## n.changepoints greater than number of observations. Using 8
+## n.changepoints greater than number of observations. Using 9
+## n.changepoints greater than number of observations. Using 10
+## n.changepoints greater than number of observations. Using 11
+## n.changepoints greater than number of observations. Using 11
+## n.changepoints greater than number of observations. Using 12
+## n.changepoints greater than number of observations. Using 13
+## n.changepoints greater than number of observations. Using 14
+## n.changepoints greater than number of observations. Using 15
+## n.changepoints greater than number of observations. Using 15
+## n.changepoints greater than number of observations. Using 16
+## n.changepoints greater than number of observations. Using 17
+## n.changepoints greater than number of observations. Using 18
+## n.changepoints greater than number of observations. Using 19
+## n.changepoints greater than number of observations. Using 19
+## n.changepoints greater than number of observations. Using 20
+## n.changepoints greater than number of observations. Using 21
+## n.changepoints greater than number of observations. Using 22
+## n.changepoints greater than number of observations. Using 23
+## n.changepoints greater than number of observations. Using 23
+## n.changepoints greater than number of observations. Using 24
+## Warning: 18 errors (2 unique) encountered for ets
+## [12] A seasonal ETS model cannot be used for this data.
+## [6] Not enough data to estimate this ETS model.
+## Warning: 4 errors (3 unique) encountered for stlf
+## [1] In argument: `cmp = map(.fit, components)`.
+## [2] Not enough data to estimate this ETS model.
+## [1] only 1 case, but 2 variables
+## Warning: 35 errors (1 unique) encountered for arima
+## [35] Not enough data to estimate a model with those options of P and Q. Consider allowing smaller values of P and Q to be selected.
+## Warning: 1 error encountered for proph
+## [1] Dataframe has less than 2 non-NA rows.
+## # A tibble: 5 × 10
+##   .model      .type       ME  RMSE   MAE     MPE  MAPE  MASE RMSSE  ACF1
+##   <chr>       <chr>    <dbl> <dbl> <dbl>   <dbl> <dbl> <dbl> <dbl> <dbl>
+## 1 arima       Test  -0.00765 0.484 0.329 -0.0368  1.19 0.306 0.352 0.114
+## 2 combination Test  -0.00790 0.586 0.404 -0.0636  1.47 0.375 0.427 0.403
+## 3 ets         Test   0.0103  0.508 0.349  0.0227  1.27 0.324 0.370 0.240
+## 4 proph       Test   0.0725  4.00  1.29   0.479   5.40 1.20  2.91  0.221
+## 5 stlf        Test   0.0319  0.646 0.432  0.117   1.64 0.402 0.470 0.168
 #.model      .type       ME  RMSE   MAE     MPE  MAPE  MASE RMSSE  ACF1
 #<chr>       <chr>    <dbl> <dbl> <dbl>   <dbl> <dbl> <dbl> <dbl> <dbl>
 #1 arima       Test  -0.00765 0.484 0.329 -0.0368  1.19 0.306 0.352 0.114
@@ -298,16 +588,14 @@ cv %>% model(
 
 fit_sarima6 |> 
   gg_tsresiduals(lag=36) 
-
-
-
+ 
 # 6. forecasting
 fit_sarima6 %>% forecast(h = 60) %>% autoplot(production) +
   labs(title = "Forecasts of Production: Total industry excluding construction
        using the ARIMA (0,1,2)(0,1,1) model")
-
+ 
 fit_sarima6 %>% forecast(h = 60) %>%
   autoplot(production  |>   filter_index("2003 Jan" ~ .)) +
   labs(title = "Forecasts of Production: Total industry excluding construction
        using the ARIMA (0,1,2)(0,1,1) model")
-
+ 
