@@ -61,7 +61,7 @@
 	--This makes sense because at the beginning, there are no cases or tests or vaccinations, and countries have
 	--different ways and periods of collecting information.
 	
-  --Data Cleaning
+  --5. Data Cleaning
     
 	--The country names contain summarized rows, which should not be included in further calculations.
 	--So it is better to get rid of these columns first.
@@ -80,7 +80,7 @@
 	FROM CovidDeaths
 	WHERE continent IS NOT NULL;
 
-  --5. Data Analysis
+  --6. Data Analysis
     
 	--First, I want to know how many countries are involved and what they are.
 	--How many countries are in the dataset?
@@ -96,13 +96,13 @@
 	--Second, I want to measure the mortality and morbidity.
 	--What is the total number of cases, deaths, and death rate globally as of the latest date in the dataset?
 	SELECT SUM(new_cases) AS total_cases, SUM(new_deaths) AS total_deaths, SUM(new_deaths)/SUM(new_cases)*100 AS death_rate
-    FROM CovidDeath;
+    	FROM CovidDeath;
 	--As of the latest date in the dataset, there are a total of 772 million people infected by Covid 19, and almost 7 million people died.
 	--The global death rate is 0.9%.
 
 	--What is the total number of cases, deaths, and death rate for each continent as of the latest date in the dataset?
 	SELECT continent, SUM(new_cases) AS total_cases, SUM(new_deaths) AS total_deaths, SUM(new_deaths)/SUM(new_cases)*100 AS death_rate
-    FROM CovidDeath
+    	FROM CovidDeath
 	WHERE total_cases IS NOT NULL AND total_deaths IS NOT NULL
 	GROUP BY continent
 	ORDER BY total_cases DESC;
@@ -113,7 +113,7 @@
 
 	--What is the total number of cases, deaths, and death rate for each country as of the latest date in the dataset?
 	SELECT location, SUM(new_cases) AS total_cases, SUM(new_deaths) AS total_deaths, SUM(new_deaths)/SUM(new_cases)*100 AS death_rate
-    FROM CovidDeath
+    	FROM CovidDeath
 	WHERE total_cases IS NOT NULL AND total_deaths IS NOT NULL
 	GROUP BY location
 	ORDER BY total_cases DESC;
@@ -266,7 +266,7 @@
 	--The higher the ratio, the more effective the vaccinations to the country.
 	--Countries with the highest effectiveness are some small countries. 
 
-  --6. Conclusion
+  --7. Conclusion
 
 	--COVID-19 has had a very negative impact on the world, causing millions of deaths and billions of infections.
 	--Almost one-third of the world's countries have above-average death rates.
